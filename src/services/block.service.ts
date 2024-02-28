@@ -1,60 +1,9 @@
 import fs from "fs";
-import { Transaction } from "../interfaces/transaction.interface";
 import { Validator } from "../interfaces/validator.interface";
 import { Operator } from "../interfaces/operator.interface";
 import { Block } from "../interfaces/block.interface";
-import { generateId, generateUniqueAddress } from "../utils/utils";
-import { findValidator } from "../utils/validators";
-import { addOperator, findOperator } from "../utils/operators";
-
-const processSingleTransaction = (
-  transaction: Transaction,
-  validators: Validator[],
-  operators: Operator[]
-): void => {
-  const existingValidator: any = findValidator(validators, transaction.address);
-
-  if (!existingValidator) {
-    const newValidator: Validator = {
-      id: generateId(),
-      address: transaction.address,
-      operators: transaction.register,
-    };
-
-    if (newValidator.operators.length >= 3) {
-      validators.push(newValidator);
-
-      for (const operatorId of transaction.register) {
-        const existingOperator = findOperator(operators, operatorId);
-
-        if (existingOperator) {
-          if (!existingOperator.validators.includes(newValidator.id)) {
-            existingOperator.validators.push(newValidator.id);
-          }
-        } else {
-          const newOperator: Operator = {
-            id: operatorId,
-            validators: [newValidator.id],
-          };
-
-          addOperator(operators, newOperator);
-        }
-      }
-    }
-  }
-};
-
-const processTransactions = (
-  transactions: Transaction[],
-  validators: Validator[],
-  operators: Operator[]
-): void => {
-  for (const transaction of transactions) {
-    if (transaction.register.length > 0) {
-      processSingleTransaction(transaction, validators, operators);
-    }
-  }
-};
+import { generateUniqueAddress } from "../utils/utils";
+import { processTransactions } from "./transaction.service";
 
 const processBlocks = (
   blocks: Block[],
